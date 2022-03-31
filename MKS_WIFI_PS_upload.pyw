@@ -21,11 +21,13 @@ def generate_tft(img):
     else:
         res = ';;gimage:'
     pixels = img.convert('RGB')
-    for y in range(width):
-        for x in range(height):
+    for y in range(height):
+        for x in range(width):
             r, g, b = pixels.getpixel((x,y))
             res += rgb2tft(r, g, b)
-        res += '\nM10086 ;'
+        res += '\rM10086 ;'
+        if y == height - 1:
+            res += "\r"
     return res
 
 def rgb2tft(r, g, b):
@@ -60,14 +62,13 @@ def convertPrusaThumb2TFTThumb(PrusaGCodeFileName): #Replace PrusaSlicer's Thumb
             image = Image.open(stream).convert("RGB") # ......................................................................... for converting into PIL image
             stream.close()
             TFTGCodeDatas += generate_tft(image) # .............................................................................. converts PIL image into TFT GCode
-            s_pattern = '; thumbnail begin .*; thumbnail end'
-            TFTGCodeDatas = TFTGCodeDatas + '\n' +  re.sub( s_pattern, '', PrusaGCodeDatas, flags = re.M|re.I|re.S ) # .......... removes Prusa GCode and inserts TFTG Code
-            fileOut = open(PrusaGCodeFileName, "w") 
-            fileOut.write(TFTGCodeDatas)
-            fileOut.close()
-            
         except:
             pass
+    s_pattern = '; thumbnail begin .*; thumbnail end'
+    TFTGCodeDatas = TFTGCodeDatas + '\n' +  re.sub( s_pattern, '', PrusaGCodeDatas, flags = re.M|re.I|re.S ) # .................. removes Prusa GCode and inserts TFTG Code
+    fileOut = open(PrusaGCodeFileName, "w")
+    fileOut.write(TFTGCodeDatas)
+    fileOut.close()
     return
 
 try:
